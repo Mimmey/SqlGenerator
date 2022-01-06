@@ -44,8 +44,8 @@ public class Randomizer {
         return getNumber(usersCount + monstersCount + 1, usersCount + monstersCount + torturedSoulsCount + 1);
     }
 
-    public static int getWorkingSoulId(int usersCount, int monstersCount, int torturedSoulsCount, int personIdCount) {
-        return getNumber(usersCount + monstersCount + torturedSoulsCount + 1, personIdCount);
+    public static int getWorkingSoulId(int usersCount, int monstersCount, int torturedSoulsCount, int workingSoulsCount) {
+        return getNumber(usersCount + monstersCount + torturedSoulsCount + 1, usersCount + monstersCount + torturedSoulsCount + workingSoulsCount);
     }
 
     public static int getTortureId(int torturesCount) {

@@ -10,8 +10,9 @@ public class Generator {
      * 2: AUTO
      * users: 3 .. usersCount
      * monsters: usersCount + 1 .. usersCount + monstersCount
-     * torturedSouls: usersCount + monstersCount + 1 .. usersCount + monstersCount + torturedSoulsCount + 1
-     * workingSouls: usersCount + monstersCount + torturedSoulsCount + 1 .. personIdCount
+     * torturedSouls: usersCount + monstersCount + 1 .. usersCount + monstersCount + torturedSoulsCount
+     * workingSouls: usersCount + monstersCount + torturedSoulsCount + 1 .. workingSouls: usersCount + monstersCount + torturedSoulsCount + workingSoulsCount
+     * nonDistributedSouls: workingSouls: usersCount + monstersCount + torturedSoulsCount + workingSoulsCount .. personIdCount
      */
 
     private BufferedWriter writer;
@@ -25,6 +26,7 @@ public class Generator {
     private static int torturedSoulsCount = 0;
     private static int usersCount = 0;
     private static int worksCount = 0;
+    private static int workingSoulsCount = 0;
 
     public Generator(BufferedWriter writer) {
         this.writer = writer;
@@ -47,21 +49,24 @@ public class Generator {
     }
 
     public void generateComplaints() throws IOException {
-        String[] titles = new String[]{"Перевод на работу", "Смена пытки", "Перерождение"};
-        String[] bodies = new String[]{"Переведите меня, пожалуйста, на работу", "Смените мне пытку, пожалуйста", "Переродите меня, пожалуйста"};
+        String[] titles = new String[]{"Перевод на работу", "Смена пытки", "Перерождение", "Большая просьба", "Меня замучали!"};
+        String[] bodies = new String[]{"Переведите меня, пожалуйста, на работу", "Смените мне пытку, пожалуйста", "Переродите меня, пожалуйста", "Я очень устал, дайте мне работу вместо пытки", "Пожалуйста, увольте моего монстра, он делает то, что мне не назначено!"};
 
-        for (int i = 0; i < titles.length; i++) {
-            String title = titles[i];
-            String body = bodies[i];
+        int amount = Randomizer.getNumber(100, 500);
+
+        for (int i = 0; i < amount; i++) {
+            int index = Randomizer.getNumber(0, titles.length - 1);
+            String title = titles[index];
+            String body = bodies[index];
             int soulId = Randomizer.getTorturedSoulId(usersCount, monstersCount, torturedSoulsCount);
-            int statusId = Randomizer.getNumber(0, 1) == 0 ? 1 : 3;
+            int statusId = 1;
             int handlerId = Randomizer.getHandlerId(usersCount);
             writer.write(String.format("INSERT INTO complaint (title, body, soul_id, status_id, handler_id) VALUES ('%s', '%s', %d, %d, %d);\n", title, body, soulId, statusId, handlerId));
         }
     }
 
     public void generateEvents() throws IOException {
-        String[] actionList = new String[]{"Убил", "Сбил", "Украл", "Избил", "Сбросил со скалы", "Съел", "Замучил", "Ударил", "Оклеветал", "Держал в заложниках"};
+        String[] actionList = new String[]{"Убил", "Сбил", "Похитил", "Избил", "Сбросил со скалы", "Довел до самоубийства", "Замучил", "Ударил", "Застрелил", "Держал в заложниках"};
         String[] subjectList = new String[]{"консьержку", "знакомую", "знакомого", "собаку", "одногруппника", "жену", "прохожего", "соседа", "друга", "брата"};
         String[] conditionList = new String[]{"с особой жестокостью", "не единожды", "будучи принужденным", "будучи в состоянии алкогольного опьянения", "будучи в состоянии наркотического опьянения", "будучи в состоянии аффекта", "и скрылся с места преступления", "и пришел с повинной", "и был пойман с поличным", "и понес наказание в виде лишения свободы"};
 
@@ -150,7 +155,7 @@ public class Generator {
     public void generateSinTypes() throws IOException {
         String[] sinTypes = new String[]{"Убийство", "Воровство", "Военное преступление", "Профессиональное преступление",
                 "Рецидивистское преступление", "Вымогательство", "Хулиганство",
-                "Доведение до самоубийства", "Хулиганство", "Похищение человека",
+                "Доведение до самоубийства", "Похищение человека",
                 "Террористический акт", "жестокое обращение с животными", "Клевета", "Побои",
                 "Причинение тяжкого вреда здоровью"};
 
@@ -169,6 +174,7 @@ public class Generator {
         String[] nameList = new String[]{"Иван", "Дмитрий", "Николай", "Сергей", "Глеб", "Борис", "Денис", "Валерий", "Мирослав", "Григорий", "Артемий", "Виталий", "Александр", "Алексей"};
         String[] torturedMenSurnameList = new String[]{"Иванов", "Шигалев", "Григорьев", "Краснов", "Белов", "Кроваткин", "Стулович", "Красочников", "Вернандский", "Чопорев", "Трубчанский", "Туманов", "Тучников", "Капотников"};
         String[] workingMenSurnameList = new String[]{"Чуков", "Геков", "Сланцев", "Тихомиров", "Чукотский", "Корышкин", "Лебедев", "Ларченко", "Круглёныш", "Ножница", "Лимонченко", "Сташевский"};
+        String[] nonDistributedMenSurnameList = new String[]{"Пух", "Рыжов", "Чмок", "Кряк", "Кройченко", "Пекаревский", "Кисловязов", "Собирович", "Дровосековский", "Лукич", "Застекайло", "Многокриков"};
         String[] fatherNameList = new String[]{"Иванович", "Дмитриевич", "Николаевич", "Сергеевич", "Глебович", "Борисович", "Денисович", "Валерьевич", "Мирославович", "Григорьевич", "Артемьевич", "Витальевич", "Александрович", "Алексеевич"};
 
         for (String i : nameList) {
@@ -198,6 +204,21 @@ public class Generator {
                     int tortureId = Randomizer.getTortureId(torturesCount);
                     writer.write(String.format("INSERT INTO person (_name) VALUES ('%s %s %s');\n", i, k, j));
                     writer.write(String.format("INSERT INTO soul (person_id, birth_date, date_of_death, is_working, is_distributed, handler_id, torture_id) VALUES (%d, '%s', '%s', %b, %b, %d, %d);\n", ++personIdCount, dateOfBirth, dateOfDeath, isWorking, isDistributed, handlerId, tortureId));
+                    workingSoulsCount++;
+                }
+            }
+        }
+
+        for (String i : nameList) {
+            for (String j : nonDistributedMenSurnameList) {
+                for (String k : fatherNameList) {
+                    String dateOfBirth = Randomizer.getDate("1903-01-01", "1923-01-01");
+                    String dateOfDeath = Randomizer.getDate("1973-01-01", "2022-01-01");
+                    boolean isWorking = false;
+                    boolean isDistributed = false;
+                    int tortureId = Randomizer.getTortureId(torturesCount);
+                    writer.write(String.format("INSERT INTO person (_name) VALUES ('%s %s %s');\n", i, k, j));
+                    writer.write(String.format("INSERT INTO soul (person_id, birth_date, date_of_death, is_working, is_distributed, torture_id) VALUES (%d, '%s', '%s', %b, %b, %d);\n", ++personIdCount, dateOfBirth, dateOfDeath, isWorking, isDistributed, tortureId));
                 }
             }
         }
@@ -237,10 +258,8 @@ public class Generator {
     }
 
     public void generateWorkList() throws IOException {
-        int amount = Randomizer.getNumber(100, 500);
-
-        for (int i = 0; i < amount; i++) {
-            int soulId = Randomizer.getWorkingSoulId(usersCount, monstersCount, torturedSoulsCount, personIdCount);
+        for (int i = 0; i < workingSoulsCount; i++) {
+            int soulId = i + usersCount + monstersCount + torturedSoulsCount + 1;
             int workId = Randomizer.getWorkId(worksCount);
 
             writer.write(String.format("INSERT INTO work_list (soul_id, work_id) VALUES (%d, %d);\n", soulId, workId));
