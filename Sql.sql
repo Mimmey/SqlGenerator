@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS work_list (
                                 FOREIGN KEY(soul_id) REFERENCES soul (person_id) ON DELETE CASCADE,
                                 FOREIGN KEY(work_id) REFERENCES work (id) ON DELETE CASCADE);
 
+//todo func with auth
 CREATE OR REPLACE FUNCTION make_soul_working() RETURNS TRIGGER 
     AS $$
         BEGIN
@@ -101,6 +102,18 @@ CREATE OR REPLACE FUNCTION make_soul_working() RETURNS TRIGGER
 
 CREATE TRIGGER tr_make_soul_working AFTER INSERT ON work_list
 FOR EACH ROW EXECUTE PROCEDURE make_soul_working();
+
+//todo func with auth
+CREATE OR REPLACE FUNCTION handle_event() RETURNS TRIGGER
+    AS $$
+BEGIN
+UPDATE _event SET status_id=2 WHERE person_id=NEW.soul_id;
+return NEW;
+END;
+    $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tr_handle_event AFTER INSERT ON sin_type_distribution_list
+    FOR EACH ROW EXECUTE PROCEDURE handle_event();
 
 CREATE OR REPLACE FUNCTION delete_user() RETURNS TRIGGER 
     AS $$

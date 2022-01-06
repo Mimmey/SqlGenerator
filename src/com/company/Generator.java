@@ -13,10 +13,16 @@ public class Generator {
      * torturedSouls: usersCount + monstersCount + 1 .. usersCount + monstersCount + torturedSoulsCount
      * workingSouls: usersCount + monstersCount + torturedSoulsCount + 1 .. workingSouls: usersCount + monstersCount + torturedSoulsCount + workingSoulsCount
      * nonDistributedSouls: workingSouls: usersCount + monstersCount + torturedSoulsCount + workingSoulsCount .. personIdCount
-     */
+     * */
+
+    /**
+     * distributedEvents: 1 .. distributedEventsCount
+     * nonDistributedEvents: distributedEventsCount + 1 .. eventsCount
+     * */
 
     private BufferedWriter writer;
     private static int eventsCount = 0;
+    private static int distributedEventsCount = 0;
     private static int locationsCount = 0;
     private static int monstersCount = 0;
     private static int personIdCount = 0;
@@ -60,25 +66,39 @@ public class Generator {
             String body = bodies[index];
             int soulId = Randomizer.getTorturedSoulId(usersCount, monstersCount, torturedSoulsCount);
             int statusId = 1;
-            int handlerId = Randomizer.getHandlerId(usersCount);
-            writer.write(String.format("INSERT INTO complaint (title, body, soul_id, status_id, handler_id) VALUES ('%s', '%s', %d, %d, %d);\n", title, body, soulId, statusId, handlerId));
+            writer.write(String.format("INSERT INTO complaint (title, body, soul_id, status_id) VALUES ('%s', '%s', %d, %d);\n", title, body, soulId, statusId));
         }
     }
 
     public void generateEvents() throws IOException {
         String[] actionList = new String[]{"Убил", "Сбил", "Похитил", "Избил", "Сбросил со скалы", "Довел до самоубийства", "Замучил", "Ударил", "Застрелил", "Держал в заложниках"};
-        String[] subjectList = new String[]{"консьержку", "знакомую", "знакомого", "собаку", "одногруппника", "жену", "прохожего", "соседа", "друга", "брата"};
+        String[] subjectDistributedList = new String[]{"консьержку", "знакомую", "знакомого", "собаку", "одногруппника", "жену", "прохожего", "соседа", "друга", "брата"};
+        String[] subjectNonDistributedList = new String[]{"кошку", "тещу", "тестя", "сестру", "двоюродную сестру", "племянницу", "бездомного", "коллегу", "начальника", "племянника"};
         String[] conditionList = new String[]{"с особой жестокостью", "не единожды", "будучи принужденным", "будучи в состоянии алкогольного опьянения", "будучи в состоянии наркотического опьянения", "будучи в состоянии аффекта", "и скрылся с места преступления", "и пришел с повинной", "и был пойман с поличным", "и понес наказание в виде лишения свободы"};
 
         for (String action : actionList) {
-            for (String subject : subjectList) {
+            for (String subject : subjectDistributedList) {
+                for (String condition : conditionList) {
+                    String crime = action + " " + subject + " " + condition;
+                    int soulId = Randomizer.getTorturedSoulId(usersCount, monstersCount, torturedSoulsCount);
+                    String date = Randomizer.getDate("1943-01-01", "1973-01-01");
+                    int statusId = 2;
+                    int handler_id = Randomizer.getHandlerId(usersCount);
+                    writer.write(String.format("INSERT INTO _event (_text, soul_id, _date, status_id, handler_id) VALUES ('%s', %d, '%s', %d, %d);\n", crime, soulId, date, statusId, handler_id));
+                    eventsCount++;
+                    distributedEventsCount++;
+                }
+            }
+        }
+
+        for (String action : actionList) {
+            for (String subject : subjectNonDistributedList) {
                 for (String condition : conditionList) {
                     String crime = action + " " + subject + " " + condition;
                     int soulId = Randomizer.getTorturedSoulId(usersCount, monstersCount, torturedSoulsCount);
                     String date = Randomizer.getDate("1943-01-01", "1973-01-01");
                     int statusId = 1;
-                    int handlerId = Randomizer.getHandlerId(usersCount);
-                    writer.write(String.format("INSERT INTO _event (_text, soul_id, _date, status_id, handler_id) VALUES ('%s', %d, '%s', %d, %d);\n", crime, soulId, date, statusId, handlerId));
+                    writer.write(String.format("INSERT INTO _event (_text, soul_id, _date, status_id) VALUES ('%s', %d, '%s', %d);\n", crime, soulId, date, statusId));
                     eventsCount++;
                 }
             }
@@ -144,7 +164,7 @@ public class Generator {
     }
 
     public void generateSinTypeDistributionList() throws IOException {
-        for (int i = 0; i < eventsCount; i++) {
+        for (int i = 0; i < distributedEventsCount; i++) {
             int eventId = i + 1;
             int sinTypeId = Randomizer.getSinTypeId(sinTypesCount);
 
