@@ -190,7 +190,7 @@ CREATE OR REPLACE FUNCTION create_work() RETURNS TRIGGER
 CREATE TRIGGER tr_create_work AFTER INSERT ON work
     FOR EACH ROW EXECUTE PROCEDURE create_work();
 
-
+/*
 CREATE OR REPLACE FUNCTION delete_work() RETURNS TRIGGER
     AS $$
         BEGIN
@@ -202,7 +202,7 @@ CREATE OR REPLACE FUNCTION delete_work() RETURNS TRIGGER
 
 CREATE TRIGGER tr_delete_work BEFORE DELETE ON work
     FOR EACH ROW EXECUTE PROCEDURE delete_work();
-
+*/
 
 CREATE OR REPLACE FUNCTION distribute_soul_by_hand() RETURNS TRIGGER
     AS $$
@@ -231,6 +231,22 @@ CREATE OR REPLACE PROCEDURE distribute_soul_by_algo(id integer)
             UPDATE soul SET is_distributed=true WHERE soul.person_id = id;
     END;
     $$ LANGUAGE plpgsql;
+
+
+//todo
+CREATE OR REPLACE FUNCTION create_event() RETURNS TRIGGER
+AS $$
+DECLARE
+    active_user_id INTEGER := SELECT person_id FROM _user WHERE _user.is_active=true;
+BEGIN
+    UPDATE _event SET handler_id=active_user_id WHERE _event.id=NEW.id;
+    return NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER create_event AFTER INSERT ON _event
+    FOR EACH ROW EXECUTE PROCEDURE create_event();
+
 
 
 CREATE OR REPLACE FUNCTION handle_event_for_trigger() RETURNS TRIGGER
@@ -286,7 +302,7 @@ CREATE TRIGGER tr_update_event_list AFTER UPDATE OF event_id ON sin_type_distrib
 CREATE OR REPLACE FUNCTION delete_from_event_list() RETURNS TRIGGER
     AS $$
         DECLARE
-            non_handled_status_id INTEGER := SELECT id FROM _status WHERE _status._name='Не обработано'
+            non_handled_status_id INTEGER := SELECT id FROM _status WHERE _status._name='Не обработано';
         BEGIN
             IF (SELECT * FROM sin_type_distribution_list WHERE event_id = OLD.event_id) IS NULL THEN
                 UPDATE _event SET status_id=non_handled_status_id WHERE _event.id=OLD.event_id;
@@ -408,8 +424,8 @@ CREATE OR REPLACE FUNCTION delete_torture() RETURNS TRIGGER
     AS $$
         BEGIN
             UPDATE soul SET torture_id=NULL, handler_id=NULL WHERE(
-                SELECT torture_id FROM torture JOIN soul ON torture.id=soul.torture_id WHERE torture_id = OLD.torture_id
-            ) = OLD.id;
+                OLD.id = SELECT torture_id FROM soul ON soul.torture_id = torture.id
+            );
             return OLD;
         END;
     $$ LANGUAGE plpgsql;
@@ -418,11 +434,12 @@ CREATE TRIGGER tr_delete_torture AFTER DELETE ON torture
 FOR EACH ROW EXECUTE PROCEDURE delete_torture();
 
 
-//todo
-CREATE OR REPLACE FUNCTION delete_monster() RETURNS TRIGGER 
+CREATE OR REPLACE FUNCTION delete_monster() RETURNS TRIGGER
     AS $$
         BEGIN
-            DELETE FROM person WHERE person.id=OLD.person_id;
+            UPDATE soul SET torture_id=NULL, handler_id=NULL WHERE(
+                OLD.id = SELECT monster_id FROM soul JOIN torture ON soul.torture_id = torture.id
+            );
             return OLD;
         END;
     $$ LANGUAGE plpgsql;
