@@ -268,7 +268,7 @@ public class Generator {
     }
 
     public void generateUsers() throws IOException {
-        String[] users = new String[]{"DELETED", "AUTO", "Аид", "Персефона", "Эак", "Радамант", "Минос"};
+        String[] users = new String[]{"DELETED", "AUTO", "UNAUTHORIZED", "Аид", "Персефона", "Эак", "Радамант", "Минос"};
 
         for (String i : users) {
             writer.write(String.format("INSERT INTO person (_name) VALUES ('%s');\n", i));
