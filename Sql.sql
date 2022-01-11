@@ -304,7 +304,7 @@ CREATE OR REPLACE FUNCTION distribute_soul_by_hand() RETURNS TRIGGER
         DECLARE
             active_user_id INTEGER;
         BEGIN
-            IF NEW.torture_id IS NOT NULL AND NOT check_if_torture_has_monster(NEW.torture_id)THEN
+            IF NEW.torture_id IS NOT NULL AND NOT check_if_torture_has_monster(NEW.torture_id) THEN
                 RAISE EXCEPTION 'TORTURE DOESNT HAVE ANY MONSTER PERFORMER';
             END IF;
             SELECT person_id INTO active_user_id FROM active_user;
@@ -631,6 +631,15 @@ CREATE OR REPLACE FUNCTION delete_soul() RETURNS TRIGGER
 
 CREATE TRIGGER tr_delete_soul AFTER DELETE ON soul
     FOR EACH ROW EXECUTE PROCEDURE delete_soul();
+
+
+DROP INDEX soul_index_hash;
+DROP INDEX complaint_index_hash;
+DROP INDEX event_index_hash;
+
+CREATE INDEX soul_index_hash ON soul USING hash(person_id);
+CREATE INDEX complaint_index_hash ON complaint USING hash(id);
+CREATE INDEX event_index_hash ON _event USING hash(id);
 
 
 DROP TRIGGER tr_authorize_after_creating ON _user;

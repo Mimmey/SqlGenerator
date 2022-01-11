@@ -97,7 +97,7 @@ public class Generator {
                 for (String condition : conditionList) {
                     String crime = action + " " + subject + " " + condition;
                     int soulId = Randomizer.getTorturedSoulId(usersCount, monstersCount, torturedSoulsCount);
-                    String date = Randomizer.getDate("1943-01-01", "1973-01-01");
+                    String date = Randomizer.getDate("1953-01-01", "1973-01-01");
                     int statusId = 1;
                     writer.write(String.format("INSERT INTO _event (_text, soul_id, _date, status_id) VALUES ('%s', %d, '%s', %d);\n", crime, soulId, date, statusId));
                     eventsCount++;
