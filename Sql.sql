@@ -169,7 +169,8 @@ CREATE OR REPLACE FUNCTION check_if_torture_has_monster(id_param integer) RETURN
 CREATE OR REPLACE FUNCTION authorize_after_creating() RETURNS TRIGGER
     AS $$
         BEGIN
-            IF EXISTS (SELECT person_id FROM _user JOIN person on _user.person_id = person.id  WHERE person._name='UNAUTHORIZED') AND NEW.person_id IN (SELECT person_id FROM _user JOIN person on _user.person_id = person.id  WHERE person._name='UNAUTHORIZED') THEN
+            IF EXISTS (SELECT person_id FROM _user JOIN person on _user.person_id = person.id  WHERE person._name='UNAUTHORIZED') 
+                        AND NEW.person_id IN (SELECT person_id FROM _user JOIN person on _user.person_id = person.id  WHERE person._name='UNAUTHORIZED') THEN
                 UPDATE _user SET is_active=true WHERE _user.person_id=NEW.person_id;
             END IF;
 
@@ -186,11 +187,13 @@ CREATE TRIGGER tr_authorize_after_creating AFTER INSERT ON _user
 CREATE OR REPLACE FUNCTION authorize_for_trigger() RETURNS TRIGGER
     AS $$
         BEGIN
-            IF NEW.is_active=true AND (NEW.person_id NOT IN (SELECT person_id FROM _user JOIN person ON _user.person_id=person.id WHERE (person._name IN ('DELETED', 'AUTO', 'UNAUTHORIZED', 'NON-HANDLED')))) THEN
+            IF NEW.is_active=true AND (NEW.person_id NOT IN (SELECT person_id FROM _user JOIN person ON _user.person_id=person.id 
+                        WHERE (person._name IN ('DELETED', 'AUTO', 'UNAUTHORIZED', 'NON-HANDLED')))) THEN
                 UPDATE _user SET is_active=false WHERE (NEW.person_id != _user.person_id);
             ELSE
                 UPDATE _user SET is_active=false;
-                UPDATE _user SET is_active=true WHERE _user.person_id IN (SELECT _user.person_id FROM _user JOIN person ON _user.person_id=person.id WHERE person._name='UNAUTHORIZED');
+                UPDATE _user SET is_active=true WHERE _user.person_id IN (SELECT _user.person_id FROM _user JOIN person ON _user.person_id=person.id 
+                        WHERE person._name='UNAUTHORIZED');
             END IF;
 
             REFRESH MATERIALIZED VIEW active_user;
@@ -597,7 +600,8 @@ CREATE OR REPLACE FUNCTION delete_user() RETURNS TRIGGER
             ) WHERE 'NON-HANDLED' IN (SELECT _name FROM person JOIN _user ON _user.person_id=person.id WHERE person_id=_event.handler_id);
 
             DELETE FROM person WHERE person.id=OLD.person_id;
-            UPDATE _user SET is_active=true WHERE _user.person_id IN (SELECT _user.person_id FROM _user JOIN person ON _user.person_id=person.id WHERE person._name='UNAUTHORIZED');
+            UPDATE _user SET is_active=true WHERE _user.person_id IN (SELECT _user.person_id FROM _user JOIN person ON _user.person_id=person.id 
+                    WHERE person._name='UNAUTHORIZED');
             REFRESH MATERIALIZED VIEW active_user;
             return OLD;
         END;
