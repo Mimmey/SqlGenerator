@@ -24,8 +24,8 @@ public class Randomizer {
         return (int) (from + Math.round(Math.random() * (to - from)));
     }
 
-    public static int getHandlerId(int usersCount) {
-        return getNumber(3, usersCount);
+    public static int getHandlerId(int usersCount, int restrictedUsersLastIndex) {
+        return getNumber(restrictedUsersLastIndex, usersCount);
     }
 
     public static int getTartarLocationId(int tartarLevelLocationsCount) {

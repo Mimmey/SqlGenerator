@@ -20,7 +20,8 @@ public class Generator {
      * nonDistributedEvents: distributedEventsCount + 1 .. eventsCount
      * */
 
-    private BufferedWriter writer;
+    private final BufferedWriter writer;
+    private static final int restricted_users_last_index = 4;
     private static int eventsCount = 0;
     private static int distributedEventsCount = 0;
     private static int locationsCount = 0;
@@ -39,17 +40,17 @@ public class Generator {
     }
 
     public void generate() throws IOException {
+        generateStatuses();
         generateUsers();
         generateLevels();
         generateLocations();
         generateMonsters();
         generateTortures();
-        generateSouls();
+        generateWorks();
         generateSinTypes();
-        generateStatuses();
+        generateSouls();
         generateComplaints();
         generateEvents();
-        generateWorks();
         generateSinTypeDistributionList();
         generateWorkList();
     }
@@ -83,7 +84,7 @@ public class Generator {
                     int soulId = Randomizer.getTorturedSoulId(usersCount, monstersCount, torturedSoulsCount);
                     String date = Randomizer.getDate("1943-01-01", "1973-01-01");
                     int statusId = 2;
-                    int handler_id = Randomizer.getHandlerId(usersCount);
+                    int handler_id = Randomizer.getHandlerId(usersCount, restricted_users_last_index);
                     writer.write(String.format("INSERT INTO _event (_text, soul_id, _date, status_id, handler_id) VALUES ('%s', %d, '%s', %d, %d);\n", crime, soulId, date, statusId, handler_id));
                     eventsCount++;
                     distributedEventsCount++;
@@ -112,7 +113,7 @@ public class Generator {
 
         for (String i : works) {
             int locationId = Randomizer.getNotTartarLocationId(tartarLevelLocationsCount, locationsCount);
-            int creatorId = Randomizer.getHandlerId(usersCount);
+            int creatorId = Randomizer.getHandlerId(usersCount, restricted_users_last_index);
             this.writer.write(String.format("INSERT INTO work (_name, location_id, creator_id) VALUES ('%s', %d, %d);\n", i, locationId, creatorId));
             worksCount++;
         }
@@ -182,8 +183,8 @@ public class Generator {
         for (String i : sinTypes) {
             double weight = Randomizer.getWeight();
             String weightString = String.format(Locale.US, "%.10f", weight);
-            int handlerId = Randomizer.getHandlerId(usersCount);
-            int creatorId = Randomizer.getHandlerId(usersCount);
+            int handlerId = Randomizer.getHandlerId(usersCount, restricted_users_last_index);
+            int creatorId = Randomizer.getHandlerId(usersCount, restricted_users_last_index);
             int tortureId = Randomizer.getTortureId(torturesCount);
             writer.write(String.format("INSERT INTO sin_type (_name, _weight, creator_id, handler_id, torture_id) VALUES ('%s', %s, %d, %d, %d);\n", i, weightString, creatorId, handlerId, tortureId));
             sinTypesCount++;
@@ -204,7 +205,7 @@ public class Generator {
                     String dateOfDeath = Randomizer.getDate("1973-01-01", "2022-01-01");
                     boolean isWorking = false;
                     boolean isDistributed = true;
-                    int handlerId = Randomizer.getHandlerId(usersCount);
+                    int handlerId = Randomizer.getHandlerId(usersCount, restricted_users_last_index);
                     int tortureId = Randomizer.getTortureId(torturesCount);
                     writer.write(String.format("INSERT INTO person (_name) VALUES ('%s %s %s');\n", i, k, j));
                     writer.write(String.format("INSERT INTO soul (person_id, birth_date, date_of_death, is_working, is_distributed, handler_id, torture_id) VALUES (%d, '%s', '%s', %b, %b, %d, %d);\n", ++personIdCount, dateOfBirth, dateOfDeath, isWorking, isDistributed, handlerId, tortureId));
@@ -220,7 +221,7 @@ public class Generator {
                     String dateOfDeath = Randomizer.getDate("1973-01-01", "2022-01-01");
                     boolean isWorking = true;
                     boolean isDistributed = true;
-                    int handlerId = Randomizer.getHandlerId(usersCount);
+                    int handlerId = Randomizer.getHandlerId(usersCount, restricted_users_last_index);
                     int tortureId = Randomizer.getTortureId(torturesCount);
                     writer.write(String.format("INSERT INTO person (_name) VALUES ('%s %s %s');\n", i, k, j));
                     writer.write(String.format("INSERT INTO soul (person_id, birth_date, date_of_death, is_working, is_distributed, handler_id, torture_id) VALUES (%d, '%s', '%s', %b, %b, %d, %d);\n", ++personIdCount, dateOfBirth, dateOfDeath, isWorking, isDistributed, handlerId, tortureId));
@@ -259,8 +260,8 @@ public class Generator {
                 "Пресс для черепа", "Колыбель Иуды", "Железная дева", "Кол", "Пила"};
 
         for (String i : tortures) {
-            int creatorId = Randomizer.getHandlerId(usersCount);
-            int handlerId = Randomizer.getHandlerId(usersCount);
+            int creatorId = Randomizer.getHandlerId(usersCount, restricted_users_last_index);
+            int handlerId = Randomizer.getHandlerId(usersCount, restricted_users_last_index);
             int monsterId = Randomizer.getMonsterId(usersCount, monstersCount);
             writer.write(String.format("INSERT INTO torture (_name, monster_id, creator_id, handler_id) VALUES ('%s', %d, %d, %d);\n", i, monsterId, creatorId, handlerId));
             torturesCount++;
@@ -268,7 +269,7 @@ public class Generator {
     }
 
     public void generateUsers() throws IOException {
-        String[] users = new String[]{"DELETED", "AUTO", "UNAUTHORIZED", "Аид", "Персефона", "Эак", "Радамант", "Минос"};
+        String[] users = new String[]{"DELETED", "AUTO", "UNAUTHORIZED", "NON-HANDLED", "Аид", "Персефона", "Эак", "Радамант", "Минос"};
 
         for (String i : users) {
             writer.write(String.format("INSERT INTO person (_name) VALUES ('%s');\n", i));
