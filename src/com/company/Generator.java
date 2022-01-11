@@ -82,7 +82,7 @@ public class Generator {
                 for (String condition : conditionList) {
                     String crime = action + " " + subject + " " + condition;
                     int soulId = Randomizer.getTorturedSoulId(usersCount, monstersCount, torturedSoulsCount);
-                    String date = Randomizer.getDate("1943-01-01", "1973-01-01");
+                    String date = Randomizer.getDate("1953-01-01", "1973-01-01");
                     int statusId = 2;
                     int handler_id = Randomizer.getHandlerId(usersCount, restricted_users_last_index);
                     writer.write(String.format("INSERT INTO _event (_text, soul_id, _date, status_id, handler_id) VALUES ('%s', %d, '%s', %d, %d);\n", crime, soulId, date, statusId, handler_id));
@@ -201,7 +201,7 @@ public class Generator {
         for (String i : nameList) {
             for (String j : torturedMenSurnameList) {
                 for (String k : fatherNameList) {
-                    String dateOfBirth = Randomizer.getDate("1903-01-01", "1923-01-01");
+                    String dateOfBirth = Randomizer.getDate("1923-01-01", "1933-01-01");
                     String dateOfDeath = Randomizer.getDate("1973-01-01", "2022-01-01");
                     boolean isWorking = false;
                     boolean isDistributed = true;
@@ -217,7 +217,7 @@ public class Generator {
         for (String i : nameList) {
             for (String j : workingMenSurnameList) {
                 for (String k : fatherNameList) {
-                    String dateOfBirth = Randomizer.getDate("1903-01-01", "1923-01-01");
+                    String dateOfBirth = Randomizer.getDate("1923-01-01", "1933-01-01");
                     String dateOfDeath = Randomizer.getDate("1973-01-01", "2022-01-01");
                     boolean isWorking = true;
                     boolean isDistributed = true;
@@ -233,7 +233,7 @@ public class Generator {
         for (String i : nameList) {
             for (String j : nonDistributedMenSurnameList) {
                 for (String k : fatherNameList) {
-                    String dateOfBirth = Randomizer.getDate("1903-01-01", "1923-01-01");
+                    String dateOfBirth = Randomizer.getDate("1923-01-01", "1933-01-01");
                     String dateOfDeath = Randomizer.getDate("1973-01-01", "2022-01-01");
                     boolean isWorking = false;
                     boolean isDistributed = false;
