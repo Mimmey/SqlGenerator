@@ -632,15 +632,29 @@ CREATE OR REPLACE FUNCTION delete_soul() RETURNS TRIGGER
 CREATE TRIGGER tr_delete_soul AFTER DELETE ON soul
     FOR EACH ROW EXECUTE PROCEDURE delete_soul();
 
+CREATE INDEX soul_index_hash ON soul USING hash(person_id);
+CREATE INDEX soul_index_btree ON soul USING btree(person_id);
+
+CREATE INDEX event_index_hash ON _event USING hash(id);
+CREATE INDEX event_index_btree ON _event USING btree(id);
+
+CREATE INDEX work_list_index_btree ON work_list USING btree(soul_id, work_id);
+CREATE INDEX sin_type_distribution_list_index_btree ON sin_type_distribution_list USING btree(event_id, sin_type_id);
+
+set enable_hashjoin = off;
+
+set enable_hashjoin = on;
+
+
+/*DELETION*/
+
 
 DROP INDEX soul_index_hash;
-DROP INDEX complaint_index_hash;
+DROP INDEX soul_index_btree;
 DROP INDEX event_index_hash;
-
-CREATE INDEX soul_index_hash ON soul USING hash(person_id);
-CREATE INDEX complaint_index_hash ON complaint USING hash(id);
-CREATE INDEX event_index_hash ON _event USING hash(id);
-
+DROP INDEX event_index_btree;
+DROP INDEX work_list_index_btree;
+DROP INDEX sin_type_distribution_list_index_btree;
 
 DROP TRIGGER tr_authorize_after_creating ON _user;
 DROP TRIGGER tr_authorize ON _user;
