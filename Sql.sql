@@ -643,11 +643,11 @@ CREATE INDEX sin_type_distribution_list_index_btree ON sin_type_distribution_lis
 
 set enable_hashjoin = off;
 
-set enable_hashjoin = on;
-
 
 /*DELETION*/
 
+
+set enable_hashjoin = on;
 
 DROP INDEX soul_index_hash;
 DROP INDEX soul_index_btree;
