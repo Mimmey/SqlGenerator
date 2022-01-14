@@ -96,22 +96,31 @@ CREATE MATERIALIZED VIEW active_user
     AS SELECT person_id FROM _user WHERE is_active=true;
 
 CREATE VIEW unhandled_souls
-    AS SELECT person_id FROM soul WHERE is_distributed=false;
+    AS SELECT soul.person_id, person._name FROM soul JOIN person ON soul.person_id=person.id WHERE is_distributed=false;
 
 CREATE VIEW unhandled_tortures
-    AS SELECT id FROM torture WHERE monster_id IS NULL;
+    AS SELECT torture.id, torture._name FROM torture WHERE monster_id IS NULL;
 
 CREATE VIEW unhandled_sin_types
-    AS SELECT id FROM sin_type WHERE torture_id IS NULL;
+    AS SELECT sin_type.id, sin_type._name FROM sin_type WHERE torture_id IS NULL;
 
 CREATE VIEW unhandled_complaints
-    AS SELECT id FROM complaint WHERE status_id IN (SELECT id FROM _status WHERE _status._name='Не обработано');
+    AS SELECT complaint.id, complaint.title FROM complaint JOIN _status ON complaint.status_id=_status.id WHERE _status._name='Не обработано';
 
 CREATE VIEW unhandled_events
-    AS SELECT id FROM _event WHERE status_id IN (SELECT id FROM _status WHERE _status._name='Не обработано');
+    AS SELECT _event.id, _event.soul_id, _event._text, _event._date FROM  _status JOIN _event ON _event.status_id=_status.id WHERE _status._name='Не обработано';
+
+CREATE VIEW souls_handled_by_users
+    AS SELECT person._name, _user.person_id AS user_id, soul.person_id AS soul_id FROM _user JOIN soul ON _user.person_id=soul.handler_id JOIN person ON person.id=_user.person_id;
+
+CREATE VIEW events_handled_by_users
+    AS SELECT person._name, _user.person_id, _event.id FROM _user JOIN _event ON _user.person_id=_event.handler_id JOIN person ON person.id=_user.person_id;
+
+CREATE VIEW complaints_handled_by_users
+    AS SELECT person._name, _user.person_id, complaint.id FROM _user JOIN complaint ON _user.person_id=complaint.handler_id JOIN person ON person.id=_user.person_id;
 
 CREATE VIEW tartar_locations
-    AS SELECT _location.id FROM _location JOIN _level ON _location.level_id = _level.id WHERE _level._name='Тартар';
+    AS SELECT _location.id, _location._name FROM _location JOIN _level ON _location.level_id = _level.id WHERE _level._name='Тартар';
 
 CREATE OR REPLACE FUNCTION get_auto_torture(soul_id_param integer) RETURNS INTEGER
     AS $$
@@ -632,29 +641,53 @@ CREATE OR REPLACE FUNCTION delete_soul() RETURNS TRIGGER
 CREATE TRIGGER tr_delete_soul AFTER DELETE ON soul
     FOR EACH ROW EXECUTE PROCEDURE delete_soul();
 
-CREATE INDEX soul_index_hash ON soul USING hash(person_id);
-CREATE INDEX soul_index_btree ON soul USING btree(person_id);
-
-CREATE INDEX event_index_hash ON _event USING hash(id);
-CREATE INDEX event_index_btree ON _event USING btree(id);
-
-CREATE INDEX work_list_index_btree ON work_list USING btree(soul_id, work_id);
-CREATE INDEX sin_type_distribution_list_index_btree ON sin_type_distribution_list USING btree(event_id, sin_type_id);
 
 set enable_hashjoin = off;
+set enable_mergejoin = off;
+
+/*Uneffective*/
+CREATE INDEX work_list_work_id_idx_hash ON work_list USING hash(work_id);
+CREATE INDEX work_list_soul_id_idx_hash ON work_list USING hash(soul_id);
+CREATE INDEX sin_type_distribution_list_sin_type_id_idx_hash ON sin_type_distribution_list USING hash(sin_type_id);
+CREATE INDEX sin_type_distribution_list_event_id_idx_hash ON sin_type_distribution_list USING hash(event_id);
+
+/*Effective*/
+CREATE INDEX soul_torture_id_idx_hash ON soul USING hash(torture_id);
+CREATE INDEX soul_handler_id_idx_hash ON soul USING hash(handler_id);
+CREATE INDEX event_handler_id_idx_hash ON _event USING hash(handler_id);
+CREATE INDEX complaint_handler_id_idx_hash ON complaint USING hash(handler_id);
+
+/*Uneffective*/
+/*6-7ms -> 9-10ms*/
+EXPLAIN (ANALYZE) SELECT sin_type._name, _event._text FROM sin_type JOIN sin_type_distribution_list ON sin_type_distribution_list.sin_type_id=sin_type.id JOIN _event ON sin_type_distribution_list.event_id=_event.id;
+/*9-10ms -> 15-16ms*/
+EXPLAIN (ANALYZE) SELECT work._name, person._name FROM work JOIN work_list ON work.id=work_list.work_id JOIN soul ON soul.person_id=work_list.soul_id JOIN person ON person.id=soul.person_id; 
+
+/*Effective*/
+/*20-22ms -> 15-16ms*/
+EXPLAIN (ANALYZE) SELECT torture._name, person._name FROM torture JOIN soul ON soul.torture_id=torture.id JOIN person ON soul.person_id=person.id; 
+/*21-22ms -> 4-5ms*/
+EXPLAIN (ANALYZE) SELECT * FROM souls_handled_by_users;
+/*12-13ms -> 1-2ms*/
+EXPLAIN (ANALYZE) SELECT * FROM events_handled_by_users;
+/*1.0-1.3ms -> 0.1-0.2ms*/
+EXPLAIN (ANALYZE) SELECT * FROM complaints_handled_by_users;
 
 
 /*DELETION*/
 
 
 set enable_hashjoin = on;
+set enable_mergejoin = on;
 
-DROP INDEX soul_index_hash;
-DROP INDEX soul_index_btree;
-DROP INDEX event_index_hash;
-DROP INDEX event_index_btree;
-DROP INDEX work_list_index_btree;
-DROP INDEX sin_type_distribution_list_index_btree;
+DROP INDEX soul_torture_id_idx_hash;
+DROP INDEX work_list_work_id_idx_hash;
+DROP INDEX work_list_soul_id_idx_hash;
+DROP INDEX sin_type_distribution_list_sin_type_id_idx_hash;
+DROP INDEX sin_type_distribution_list_event_id_idx_hash;
+DROP INDEX soul_handler_id_idx_hash;
+DROP INDEX event_handler_id_idx_hash;
+DROP INDEX complaint_handler_id_idx_hash;
 
 DROP TRIGGER tr_authorize_after_creating ON _user;
 DROP TRIGGER tr_authorize ON _user;
@@ -685,6 +718,9 @@ DROP VIEW unhandled_tortures;
 DROP VIEW unhandled_sin_types;
 DROP VIEW unhandled_complaints;
 DROP VIEW unhandled_events;
+DROP VIEW souls_handled_by_users;
+DROP VIEW events_handled_by_users;
+DROP VIEW complaints_handled_by_users;
 DROP VIEW tartar_locations;
 
 DROP TABLE work_list;
