@@ -29,7 +29,7 @@
       </ul>
     </li>
     <li>
-      <a href="#description">Description</a>
+      <a href="#entities-description">Entities description</a>
       <ul>
         <li><a href="#person">person</a></li>
         <li><a href="#soul">soul</a></li>
@@ -83,7 +83,7 @@ This is an example of how to list things you need to use the software and how to
 9. You can run indexEffectivityExplaining.sql if you want to create indices and look at their effectivity.
 10. Also you can delete all DB with ddlDeletion.sql
 
-## Description
+## Entities description
 
 The database is a system by which the Greek god Hades can control the afterlife. The following entities are defined in our database:
 
