@@ -138,7 +138,7 @@ You can also see a datalogical model of DB:
 
 You can control Hades' hell with common SQL selects and inserts. Firstly, you have to register(<i>INSERT INTO person (_name) VALUES ('NON-HANDLED');
 INSERT INTO _user (person_id) VALUES (integer person_id);</i>) authorize as a user (using function <i>interface_authorize(integer id)</i>). For all main interactable entities there is an opportunity of saving id of last interacting user in field <i>handler_id</i>.
-About another ways of usage you can read in <li><a href="#description">Description</a></li>
+About another ways of usage you can read in the <a href="#entities-description">Entities description</a>
 
 
 <!-- CONTRIBUTING -->
