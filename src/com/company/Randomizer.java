@@ -54,7 +54,7 @@ public class Randomizer {
 
     public static int getSinTypeId(int sinTypesCount) {
         return getNumber(1, sinTypesCount);
-    };
+    }
 
     public static double getWeight() {
         return Math.random();
@@ -62,5 +62,5 @@ public class Randomizer {
 
     public static int getWorkId(int worksCount) {
         return getNumber(1, worksCount);
-    };
+    }
 }
