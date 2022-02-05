@@ -1,7 +1,7 @@
 <br />
 <p align="center">
 
-  <h3 align="center">WebQuizEngine</h3>
+  <h3 align="center">SqlGenerator</h3>
 
   <p align="center">
     SQL-request generator for particular database of Greek myths lore
