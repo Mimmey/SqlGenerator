@@ -33,15 +33,15 @@
       <ul>
         <li><a href="#person">person</a></li>
         <li><a href="#soul">soul</a></li>
-        <li><a href="#user">user</a></li>
-        <li><a href="#level">level</a></li>
-        <li><a href="#location">location</a></li>
+        <li><a href="#_user">user</a></li>
+        <li><a href="#_level">level</a></li>
+        <li><a href="#_location">location</a></li>
         <li><a href="#monster">monster</a></li>
         <li><a href="#torture">torture</a></li>
         <li><a href="#sin_type">sin_type</a></li>
-        <li><a href="#status">status</a></li>
+        <li><a href="#_status">status</a></li>
         <li><a href="#complaint">complaint</a></li>
-        <li><a href="#event">event</a></li>
+        <li><a href="#_event">event</a></li>
         <li><a href="#work">work</a></li>
         <li><a href="#sin_type_distribution_list">sin_type_distribution_list</a></li>
         <li><a href="#work_list">work_list</a></li>
@@ -136,8 +136,18 @@ You can also see a datalogical model of DB:
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-You can control Hades' hell with common SQL selects and inserts. Firstly, you have to register(<i>INSERT INTO person (_name) VALUES ('NON-HANDLED');
-INSERT INTO _user (person_id) VALUES (integer person_id);</i>) authorize as a user (using function <i>interface_authorize(integer id)</i>). For all main interactable entities there is an opportunity of saving id of last interacting user in field <i>handler_id</i>.
+You can control Hades' hell with common SQL selects and inserts. Firstly, you have to register:
+
+<pre><code>
+  INSERT INTO person (_name) VALUES ('NON-HANDLED');
+  INSERT INTO _user (person_id) VALUES (integer person_id);
+</code></pre>
+
+Authorize as a user: 
+
+<pre><code>interface_authorize(integer id);</code></pre>
+
+For all main interactable entities there is an opportunity of saving id of last interacting user in field <i>handler_id</i>.
 About another ways of usage you can read in the <a href="#entities-description">Entities description</a>
 
 
